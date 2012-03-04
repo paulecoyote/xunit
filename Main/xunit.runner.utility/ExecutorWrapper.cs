@@ -170,18 +170,23 @@ namespace Xunit
         /// </summary>
         public void Dispose()
         {
-            if (appDomain != null)
+            // Cannot unload current domain (this thread is executing in it)
+            if (appDomain != null && appDomain != AppDomain.CurrentDomain)
             {
-                string cachePath = appDomain.SetupInformation.CachePath;
-
-                AppDomain.Unload(appDomain);
-
                 try
                 {
+                    // Accessing SetupInformation can throw a AppDomainUnloadedException
+                    string cachePath = appDomain.SetupInformation.CachePath;
+
+                    // MSDN: In some cases, calling Unload causes an immediate CannotUnloadAppDomainException, for example if it is called in a finalizer.
+                    AppDomain.Unload(appDomain);
+
+                    // If we can't unload the domain then we can't delete the cache
                     if (cachePath != null)
-                        Directory.Delete(cachePath, true);
+                        Directory.Delete(cachePath, true);                    
                 }
-                catch { }
+                catch
+                {}
             }
         }
 

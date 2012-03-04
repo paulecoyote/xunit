@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Diagnostics;
 
 namespace Xunit.Runner.MSBuild
 {
@@ -38,21 +39,30 @@ namespace Xunit.Runner.MSBuild
 
         public bool ClassFailed(string className, string exceptionType, string message, string stackTrace)
         {
-            log.LogError("[CLASS] {0}: {1}", className, Escape(message));
-            log.LogError(Escape(stackTrace));
+            string file;
+            int line;
+
+            GetFilenameAndLineFromStacktrace(stackTrace, out file, out line);
+            log.LogError(null, null, null, file, line, null, null, null, "[CLASS] {0}: {1}", className, Escape(message));
             return true;
         }
 
         public void ExceptionThrown(string assemblyFilename, Exception exception)
         {
-            log.LogError(exception.Message);
-            log.LogError("While running: {0}", assemblyFilename);
+            StackTrace stackTrace = new StackTrace(exception, true);
+            StackFrame frame = stackTrace.GetFrame(0);
+            string file = frame.GetFileName();
+            int line = frame.GetFileLineNumber();
+            int col = frame.GetFileColumnNumber();
+            log.LogError(null, null, null, file, line, col, 0, 0, exception.Message + Environment.NewLine + string.Format("While running: {0}", assemblyFilename));
         }
 
         public void TestFailed(string name, string type, string method, double duration, string output, string exceptionType, string message, string stackTrace)
         {
-            log.LogError("{0}: {1}", name, Escape(message));
-            log.LogError(Escape(stackTrace));
+            string file;
+            int line;
+            GetFilenameAndLineFromStacktrace(stackTrace, out file, out line);
+            log.LogError(null, null, null, file, line, 0, 0, 0, "{0}: {1}", name, Escape(message));
             WriteOutput(output);
         }
 
@@ -69,7 +79,7 @@ namespace Xunit.Runner.MSBuild
 
         public void TestSkipped(string name, string type, string method, string reason)
         {
-            log.LogWarning("{0}: {1}", name, Escape(reason));
+            log.LogWarning(null, null, null, "Skipping test", 0, 0, 0, 0, "{0}: {1}", name, Escape(reason));
         }
 
         public virtual bool TestStart(string name, string type, string method)
@@ -80,6 +90,28 @@ namespace Xunit.Runner.MSBuild
         static string Escape(string value)
         {
             return value.Replace(Environment.NewLine, "\n");
+        }
+
+        static void GetFilenameAndLineFromStacktrace(string stackTrace, out string file, out int line)
+        {
+            // "at <whatever> in <file>:line <line>[\n]"
+            var newlineIndex = stackTrace.IndexOf('\n');
+            if (newlineIndex > 0)
+            {
+                stackTrace = stackTrace.Remove(newlineIndex);
+            }
+
+            file = stackTrace.Substring(stackTrace.IndexOf("in ") + 3);
+            var colonIndex = file.LastIndexOf(':');
+            if (colonIndex > 0)
+            {
+                file = file.Remove(colonIndex);
+                line = int.Parse(stackTrace.Substring(stackTrace.LastIndexOf(" ")));
+            }
+            else
+            {
+                line = 0;
+            }
         }
 
         protected void WriteOutput(string output)
