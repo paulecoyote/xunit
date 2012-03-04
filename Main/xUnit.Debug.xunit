@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xunit>
+  <assemblies>
+    <assembly filename="test.xunit\bin\Debug\test.xunit.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.dll.xml" />
+    </assembly>
+    <assembly filename="test.xunit.console\bin\Debug\test.xunit.console.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.console.dll.xml" />
+    </assembly>
+    <assembly filename="test.xunit.extensions\bin\Debug\test.xunit.extensions.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.extensions.dll.xml" />
+    </assembly>
+    <assembly filename="test.xunit.gui\bin\Debug\test.xunit.gui.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.gui.dll.xml" />
+    </assembly>
+    <assembly filename="test.xunit.runner.msbuild\bin\Debug\test.xunit.runner.msbuild.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.runner.msbuild.dll.xml" />
+    </assembly>
+    <assembly filename="test.xunit.runner.tdnet\bin\Debug\test.xunit.runner.tdnet.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.runner.tdnet.dll.xml" />
+    </assembly>
+    <assembly filename="test.xunit.runner.utility\bin\Debug\test.xunit.runner.utility.dll" shadow-copy="true">
+      <output type="xml" filename="test.xunit.runner.utility.dll.xml" />
+    </assembly>
+  </assemblies>
+</xunit>
